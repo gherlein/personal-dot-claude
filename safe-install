@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# safe-install: Install Claude Code user configuration from this repo into ~/.claude
+#
+# What it does:
+#   1. Backs up any existing CLAUDE.md and skills/ in ~/.claude
+#   2. Copies CLAUDE.md to ~/.claude/CLAUDE.md
+#   3. Copies .claude/skills/*.md to ~/.claude/skills/
+#
+# What it does NOT touch (Claude Code operational data):
+#   .credentials.json, history.jsonl, settings.json, stats-cache.json,
+#   cache/, debug/, file-history/, paste-cache/, plans/, plugins/,
+#   projects/, session-env/, shell-snapshots/, tasks/, telemetry/, todos/
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+TARGET_DIR="$HOME/.claude"
+BACKUP_DIR="$TARGET_DIR/backup-$(date +%Y%m%d-%H%M%S)"
+
+# Sanity checks
+if [[ ! -f "$SCRIPT_DIR/CLAUDE.md" ]]; then
+    echo "ERROR: CLAUDE.md not found in $SCRIPT_DIR"
+    exit 1
+fi
+
+if [[ ! -d "$SCRIPT_DIR/.claude/skills" ]]; then
+    echo "ERROR: .claude/skills/ not found in $SCRIPT_DIR"
+    exit 1
+fi
+
+# Ensure target directory exists
+mkdir -p "$TARGET_DIR"
+
+# Determine what needs backing up
+NEEDS_BACKUP=false
+if [[ -f "$TARGET_DIR/CLAUDE.md" ]]; then
+    NEEDS_BACKUP=true
+fi
+if [[ -d "$TARGET_DIR/skills" ]] && ls "$TARGET_DIR/skills/"*.md &>/dev/null; then
+    NEEDS_BACKUP=true
+fi
+
+# Back up existing user config files (not operational data)
+if [[ "$NEEDS_BACKUP" == "true" ]]; then
+    echo "Backing up existing configuration to $BACKUP_DIR/"
+    mkdir -p "$BACKUP_DIR"
+    if [[ -f "$TARGET_DIR/CLAUDE.md" ]]; then
+        cp "$TARGET_DIR/CLAUDE.md" "$BACKUP_DIR/CLAUDE.md"
+        echo "  backed up CLAUDE.md"
+    fi
+    if [[ -d "$TARGET_DIR/skills" ]] && ls "$TARGET_DIR/skills/"*.md &>/dev/null; then
+        mkdir -p "$BACKUP_DIR/skills"
+        cp "$TARGET_DIR/skills/"*.md "$BACKUP_DIR/skills/"
+        echo "  backed up skills/"
+    fi
+fi
+
+# Install CLAUDE.md
+echo "Installing CLAUDE.md -> $TARGET_DIR/CLAUDE.md"
+cp "$SCRIPT_DIR/CLAUDE.md" "$TARGET_DIR/CLAUDE.md"
+
+# Install skills
+echo "Installing skills -> $TARGET_DIR/skills/"
+mkdir -p "$TARGET_DIR/skills"
+
+# Remove old skills so we don't leave stale files from a previous install
+if [[ -d "$TARGET_DIR/skills" ]] && ls "$TARGET_DIR/skills/"*.md &>/dev/null; then
+    rm "$TARGET_DIR/skills/"*.md
+fi
+
+cp "$SCRIPT_DIR/.claude/skills/"*.md "$TARGET_DIR/skills/"
+SKILL_COUNT=$(ls -1 "$TARGET_DIR/skills/"*.md | wc -l | tr -d ' ')
+echo "  installed $SKILL_COUNT skill files"
+
+# Summary
+echo ""
+echo "Installation complete."
+echo ""
+echo "Installed:"
+echo "  $TARGET_DIR/CLAUDE.md"
+echo "  $TARGET_DIR/skills/ ($SKILL_COUNT files)"
+echo ""
+if [[ "$NEEDS_BACKUP" == "true" ]]; then
+    echo "Previous config backed up to: $BACKUP_DIR/"
+fi
+echo ""
+echo "Operational files were NOT modified:"
+echo "  settings.json, .credentials.json, history.jsonl, projects/, etc."

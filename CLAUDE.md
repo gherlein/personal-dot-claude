@@ -1,0 +1,109 @@
+# CLAUDE.md - Greg Herlein's Development Environment
+
+## About Me
+
+Full-stack systems engineer working across the entire compute spectrum: embedded controllers (RP2040), SBCs (Raspberry Pi, Orange Pi), mobile phones and tablets, on-prem servers, cloud servers, and complex distributed systems on Kubernetes. Primary languages: **Go** and **web frontends** (TypeScript/JavaScript). I use Claude Code as my primary coding tool.
+
+## Global Preferences
+
+- Primary language: Go (idiomatic Go, follow stdlib conventions)
+- Frontend: TypeScript/JavaScript with modern frameworks
+- Embedded: Go where possible, C/C++ where required (RP2040, bare-metal)
+- Infrastructure: Kubernetes, Docker, cloud-native patterns
+- Containers: podman unless there is no other choice
+- Be concise. Minimize prose. Focus on working code. Don't apologize.
+- Never guess -- if unsure, search the codebase first then ask the user
+- Always read existing code before proposing changes
+- Follow existing patterns in the codebase unless you are specifically told it's a refactor
+- If the user asks a question, only answer the question -- do not edit code
+- NEVER give time estimates unless specifically asked
+- `cd` is replaced by `zoxide` -- use `command cd` to change directories (no `command` prefix for other commands)
+- Prefer passing directories as arguments over changing directories (e.g., `git -C <dir>`)
+
+## Code Quality Rules
+
+- Use meaningful names: `userRegistrationDate` not `d` (Go: camelCase exported/unexported)
+- Do not abbreviate names -- `number` not `num`, `greaterThan` not `gt`
+- No magic numbers: use named constants
+- Functions should do one thing well
+- Always handle errors explicitly (Go: never ignore returned errors)
+- DRY: extract duplicated code into shared packages
+- KISS: minimum complexity for the current task
+- Interfaces should be small and composable
+- Do not write forgiving code -- use preconditions and assert expected formats; throw on violations, do not log
+- Do not add defensive try/catch blocks -- let exceptions propagate
+- Emoji characters are forbidden in code
+
+## Comment Rules
+
+- Comments explain WHY, never WHAT
+- Do not comment out code -- remove it
+- No comments describing the change process (no past-tense verbs like "added", "removed")
+- No comments about version differences ("this code now handles...")
+- Place comments above the code they describe, never end-of-line
+- Do NOT remove TODO comments, linter/formatter suppression comments, or comments preventing empty scopes
+
+## Security Rules
+
+- Never commit API keys, passwords, or credentials
+- When reviewing code, any found API keys, passwords, or credentials require that you inform the user immediately
+- Validate all external inputs at system boundaries
+- Use parameterized queries for database access
+- HTTPS for all external API calls unless another protocol like gRPC is specified
+- No silenced warnings or linter ignores without documented rationale
+- NEVER skip or stub tests - all tests must be run - only a human can comment out or stub or skip tests
+
+## Architecture Awareness
+
+This work spans multiple deployment targets:
+- **Embedded** (RP2040): Resource-constrained, no OS or RTOS, hardware I/O
+- **SBC** (Raspberry Pi, Orange Pi): Linux-based, GPIO/sensor access, edge compute
+- **Cloud/K8s**: Microservices, distributed systems, horizontal scaling, observability
+- Code often needs to work across these tiers -- design for portability where practical
+
+## Documentation Hierarchy
+
+Requirements, specifications, and design documents are the most valuable project artifacts. Code is ephemeral and can be regenerated from specs. Never delete specs. When code and spec disagree, fix the code. Always update specs before changing implementation.
+
+## Project File Conventions
+
+- Look for `PROJECT.md` in the working folder for project details
+- Look for `docs/DESIGN.md` as the master design document
+- If asked to design software, write the design to `docs/DESIGN.md`
+
+## Project Building
+
+- Always provide a Makefile instead of build scripts
+- Makefiles should print targets if no target is provided on the command line
+- Makefiles should always provide build, test, clean, run-tests targets as a minimum
+
+## Git Commits
+
+- Stage files individually (`git add <file1> <file2>`) -- never `git add .` or `git add -A`
+- Run `just precommit` if a justfile with that recipe exists
+- Commit messages: present-tense verb, 60-120 chars, single line, end with period, no praise adjectives, no Claude attribution
+- If the prompt was a compiler/linter error, use a `fixup!` prefix
+- Echo the commit command and confirm with the user before running
+- If pre-commit hooks fail, stage resulting changes and retry -- never `--no-verify`
+
+## Build Commands
+
+- Do not run long-lived processes (dev servers, file watchers)
+- If a build is slow or verbose, echo the command and ask the user to run it
+
+## LLM Context
+
+- `.llm/` at repo root contains extra LLM context (excluded from git via `.git/info/exclude`)
+- If `.llm/todo.md` exists, it is the active task list -- mark tasks as done and keep it updated
+- Everything else in `.llm/` is read-only context
+
+## Workflow
+
+1. **Research** before implementing -- read relevant code, understand patterns
+2. **Plan** for non-trivial changes -- use plan mode
+3. **Execute** in focused increments with tests
+4. **Validate** -- run build, tests, linters, check with `git diff`
+
+## Skills
+
+Context-specific skills are in `.claude/skills/`. These provide detailed guidance for specific tasks and are designed to keep this file minimal.
