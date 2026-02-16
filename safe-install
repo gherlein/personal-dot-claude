@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# safe-install: Install Claude Code user configuration from this repo into ~/.claude
+# safe-install: Install Claude Code user configuration from this repo
 #
-# What it does:
+# Usage:
+#   ./safe-install                   Install globally to ~/.claude/
+#   ./safe-install /path/to/project  Install to a project directory
+#
+# Global install:
 #   1. Backs up any existing CLAUDE.md and skills/ in ~/.claude
 #   2. Copies CLAUDE.md to ~/.claude/CLAUDE.md
 #   3. Copies .claude/skills/*.md to ~/.claude/skills/
+#
+# Project install:
+#   1. Backs up any existing CLAUDE.md and .claude/skills/ in the project
+#   2. Copies CLAUDE.md to <project>/CLAUDE.md
+#   3. Copies .claude/skills/*.md to <project>/.claude/skills/
 #
 # What it does NOT touch (Claude Code operational data):
 #   .credentials.json, history.jsonl, settings.json, stats-cache.json,
@@ -14,7 +23,24 @@ set -euo pipefail
 #   projects/, session-env/, shell-snapshots/, tasks/, telemetry/, todos/
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TARGET_DIR="$HOME/.claude"
+
+if [[ $# -gt 0 ]]; then
+    if [[ ! -d "$1" ]]; then
+        echo "ERROR: project directory does not exist: $1"
+        exit 1
+    fi
+    PROJECT_DIR="$(cd "$1" && pwd)"
+    TARGET_DIR="$PROJECT_DIR/.claude"
+    TARGET_CLAUDE_MD="$PROJECT_DIR/CLAUDE.md"
+    SKILLS_DIR="$TARGET_DIR/skills"
+    echo "Installing to project: $PROJECT_DIR"
+else
+    TARGET_DIR="$HOME/.claude"
+    TARGET_CLAUDE_MD="$TARGET_DIR/CLAUDE.md"
+    SKILLS_DIR="$TARGET_DIR/skills"
+    echo "Installing globally to: $TARGET_DIR"
+fi
+
 BACKUP_DIR="$TARGET_DIR/backup-$(date +%Y%m%d-%H%M%S)"
 
 # Sanity checks
@@ -33,10 +59,10 @@ mkdir -p "$TARGET_DIR"
 
 # Determine what needs backing up
 NEEDS_BACKUP=false
-if [[ -f "$TARGET_DIR/CLAUDE.md" ]]; then
+if [[ -f "$TARGET_CLAUDE_MD" ]]; then
     NEEDS_BACKUP=true
 fi
-if [[ -d "$TARGET_DIR/skills" ]] && ls "$TARGET_DIR/skills/"*.md &>/dev/null; then
+if [[ -d "$SKILLS_DIR" ]] && ls "$SKILLS_DIR/"*.md &>/dev/null; then
     NEEDS_BACKUP=true
 fi
 
@@ -44,32 +70,33 @@ fi
 if [[ "$NEEDS_BACKUP" == "true" ]]; then
     echo "Backing up existing configuration to $BACKUP_DIR/"
     mkdir -p "$BACKUP_DIR"
-    if [[ -f "$TARGET_DIR/CLAUDE.md" ]]; then
-        cp "$TARGET_DIR/CLAUDE.md" "$BACKUP_DIR/CLAUDE.md"
+    if [[ -f "$TARGET_CLAUDE_MD" ]]; then
+        cp "$TARGET_CLAUDE_MD" "$BACKUP_DIR/CLAUDE.md"
         echo "  backed up CLAUDE.md"
     fi
-    if [[ -d "$TARGET_DIR/skills" ]] && ls "$TARGET_DIR/skills/"*.md &>/dev/null; then
+    if [[ -d "$SKILLS_DIR" ]] && ls "$SKILLS_DIR/"*.md &>/dev/null; then
         mkdir -p "$BACKUP_DIR/skills"
-        cp "$TARGET_DIR/skills/"*.md "$BACKUP_DIR/skills/"
+        cp "$SKILLS_DIR/"*.md "$BACKUP_DIR/skills/"
         echo "  backed up skills/"
     fi
 fi
 
 # Install CLAUDE.md
-echo "Installing CLAUDE.md -> $TARGET_DIR/CLAUDE.md"
-cp "$SCRIPT_DIR/CLAUDE.md" "$TARGET_DIR/CLAUDE.md"
+echo "Installing CLAUDE.md -> $TARGET_CLAUDE_MD"
+mkdir -p "$(dirname "$TARGET_CLAUDE_MD")"
+cp "$SCRIPT_DIR/CLAUDE.md" "$TARGET_CLAUDE_MD"
 
 # Install skills
-echo "Installing skills -> $TARGET_DIR/skills/"
-mkdir -p "$TARGET_DIR/skills"
+echo "Installing skills -> $SKILLS_DIR/"
+mkdir -p "$SKILLS_DIR"
 
 # Remove old skills so we don't leave stale files from a previous install
-if [[ -d "$TARGET_DIR/skills" ]] && ls "$TARGET_DIR/skills/"*.md &>/dev/null; then
-    rm "$TARGET_DIR/skills/"*.md
+if [[ -d "$SKILLS_DIR" ]] && ls "$SKILLS_DIR/"*.md &>/dev/null; then
+    rm "$SKILLS_DIR/"*.md
 fi
 
-cp "$SCRIPT_DIR/.claude/skills/"*.md "$TARGET_DIR/skills/"
-SKILL_COUNT=$(ls -1 "$TARGET_DIR/skills/"*.md | wc -l | tr -d ' ')
+cp "$SCRIPT_DIR/.claude/skills/"*.md "$SKILLS_DIR/"
+SKILL_COUNT=$(ls -1 "$SKILLS_DIR/"*.md | wc -l | tr -d ' ')
 echo "  installed $SKILL_COUNT skill files"
 
 # Summary
@@ -77,8 +104,8 @@ echo ""
 echo "Installation complete."
 echo ""
 echo "Installed:"
-echo "  $TARGET_DIR/CLAUDE.md"
-echo "  $TARGET_DIR/skills/ ($SKILL_COUNT files)"
+echo "  $TARGET_CLAUDE_MD"
+echo "  $SKILLS_DIR/ ($SKILL_COUNT files)"
 echo ""
 if [[ "$NEEDS_BACKUP" == "true" ]]; then
     echo "Previous config backed up to: $BACKUP_DIR/"

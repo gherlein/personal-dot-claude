@@ -87,21 +87,25 @@ clean-comments, emoji, documentation, git-operations, learn, plan-todo
 
 ## Installation
 
-The `safe-install` script deploys `CLAUDE.md` and all skill files to `~/.claude/`. It creates timestamped backups of any existing configuration and removes stale skill files from previous installations. It does not touch operational data (credentials, history, settings, cache).
+The `safe-install` script deploys `CLAUDE.md` and all skill files. It creates timestamped backups of any existing configuration and removes stale skill files from previous installations. It does not touch operational data (credentials, history, settings, cache).
+
+### Global install (default)
+
+Installs to `~/.claude/` so every Claude Code session inherits the configuration:
 
 ```bash
 ./safe-install
 ```
 
-For project-level use without global installation:
+### Project-level install
+
+Installs to a specific project directory (`CLAUDE.md` in the project root, skills in `<project>/.claude/skills/`):
 
 ```bash
-cp CLAUDE.md /path/to/project/
-mkdir -p /path/to/project/.claude/skills
-cp .claude/skills/*.md /path/to/project/.claude/skills/
+./safe-install /path/to/project
 ```
 
-Then add a project-specific `CLAUDE.md` in the project root with build commands, architecture notes, and any overrides.
+This is useful when you want project-specific configuration without modifying your global `~/.claude/` setup. You can then customize the project's `CLAUDE.md` with build commands, architecture notes, and any overrides.
 
 ## Origins
 
