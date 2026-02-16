@@ -10,12 +10,14 @@ set -euo pipefail
 # Global install:
 #   1. Backs up any existing CLAUDE.md and skills/ in ~/.claude
 #   2. Copies CLAUDE.md to ~/.claude/CLAUDE.md
-#   3. Copies .claude/skills/*.md to ~/.claude/skills/
+#   3. Replaces only repo-shipped skills in ~/.claude/skills/
+#   4. Preserves any user-created skill files not shipped by this repo
 #
 # Project install:
 #   1. Backs up any existing CLAUDE.md and .claude/skills/ in the project
 #   2. Copies CLAUDE.md to <project>/CLAUDE.md
-#   3. Copies .claude/skills/*.md to <project>/.claude/skills/
+#   3. Replaces only repo-shipped skills in <project>/.claude/skills/
+#   4. Preserves any user-created skill files not shipped by this repo
 #
 # What it does NOT touch (Claude Code operational data):
 #   .credentials.json, history.jsonl, settings.json, stats-cache.json,
@@ -90,10 +92,13 @@ cp "$SCRIPT_DIR/CLAUDE.md" "$TARGET_CLAUDE_MD"
 echo "Installing skills -> $SKILLS_DIR/"
 mkdir -p "$SKILLS_DIR"
 
-# Remove old skills so we don't leave stale files from a previous install
-if [[ -d "$SKILLS_DIR" ]] && ls "$SKILLS_DIR/"*.md &>/dev/null; then
-    rm "$SKILLS_DIR/"*.md
-fi
+# Remove only skills that this repo ships, preserving user-created skills
+for skill in "$SCRIPT_DIR/.claude/skills/"*.md; do
+    target="$SKILLS_DIR/$(basename "$skill")"
+    if [[ -f "$target" ]]; then
+        rm "$target"
+    fi
+done
 
 cp "$SCRIPT_DIR/.claude/skills/"*.md "$SKILLS_DIR/"
 SKILL_COUNT=$(ls -1 "$SKILLS_DIR/"*.md | wc -l | tr -d ' ')
