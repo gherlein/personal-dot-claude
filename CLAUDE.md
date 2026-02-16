@@ -104,6 +104,53 @@ Requirements, specifications, and design documents are the most valuable project
 3. **Execute** in focused increments with tests
 4. **Validate** -- run build, tests, linters, check with `git diff`
 
+## Autonomous Implementation Protocol
+
+When operating autonomously (permissions bypassed / no human in the loop), ALL implementations MUST follow this phased protocol. No exceptions.
+
+### Phase Execution
+
+1. The design/plan MUST break work into discrete phases with clear boundaries
+2. Implement ONE phase at a time -- do not proceed to the next phase until the current phase is complete
+3. After implementing each phase:
+   - Run ALL tests for that phase (`make test` or equivalent)
+   - If any test fails, iterate: fix the code, re-run tests, repeat until ALL tests pass
+   - Do NOT move to the next phase with failing tests
+4. Repeat for every phase until the full implementation is complete
+
+### Full Integration Validation
+
+After all phases are complete:
+1. Run the entire test suite end-to-end
+2. Run the build (`make build`)
+3. Run linters if configured
+4. If anything fails, iterate: fix, re-run, repeat until everything passes
+
+### Parallel Review Gate
+
+After all tests and builds pass, launch THREE parallel review subagents:
+
+1. **Spec Compliance Review** -- Compare the implementation against the spec/requirements documents (`PROJECT.md`, any requirements docs). Flag every deviation, missing requirement, or undocumented behavior.
+2. **Design/Architecture Review** -- Compare the implementation against `docs/DESIGN.md` and architectural constraints. Verify interfaces, data flow, error handling patterns, deployment target compatibility, and adherence to code quality rules in this file.
+3. **Security Review** -- Full security audit against OWASP top 10, the Security Rules in this file, input validation boundaries, credential handling, injection vectors, and dependency risks.
+
+Each review subagent writes its findings to `.llm/reviews/`:
+- `.llm/reviews/spec-review.md`
+- `.llm/reviews/design-review.md`
+- `.llm/reviews/security-review.md`
+
+### Review Remediation
+
+1. Read all three review files
+2. Triage findings by severity (critical > high > medium > low)
+3. Fix all critical and high findings -- iterate with tests after each fix
+4. Document any medium/low findings deferred with rationale in `.llm/reviews/deferred.md`
+5. Re-run the full test suite one final time to confirm nothing regressed
+
+### Summary
+
+The cycle is: **implement phase -> test -> iterate -> next phase -> ... -> full test -> parallel reviews -> fix findings -> final test**. Never skip phases, never skip reviews, never leave failing tests.
+
 ## Skills
 
 Context-specific skills are in `.claude/skills/`. These provide detailed guidance for specific tasks and are designed to keep this file minimal.
