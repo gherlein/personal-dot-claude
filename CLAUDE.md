@@ -71,6 +71,18 @@ Requirements, specifications, and design documents are the most valuable project
 - Look for `docs/DESIGN.md` as the master design document
 - If asked to design software, write the design to `docs/DESIGN.md`
 
+## Gitignore Policy
+
+On any file write to a development project folder -- and absolutely if a `.git` folder exists -- ensure a `.gitignore` file is present and correct:
+
+1. **Always ignore** these entries (add if missing):
+   - `.env`
+   - `.envrc`
+   - `*~`
+2. **Add language/framework best-practice ignores** for the project type (e.g., Go: `bin/`, `vendor/`; Node: `node_modules/`, `dist/`; Python: `__pycache__/`, `*.pyc`, `.venv/`; C/C++: `*.o`, `*.a`, `*.so`, `build/`; Rust: `target/`; etc.)
+3. **Do not overwrite** existing entries -- only append missing ones
+4. **Check on every write** -- if `.gitignore` does not exist, create it; if it exists, verify the mandatory entries are present and add any that are missing
+
 ## Project Building
 
 - Always provide a Makefile instead of build scripts
