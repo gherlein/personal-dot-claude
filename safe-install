@@ -51,8 +51,8 @@ if [[ ! -f "$SCRIPT_DIR/CLAUDE.md" ]]; then
     exit 1
 fi
 
-if [[ ! -d "$SCRIPT_DIR/.claude/skills" ]]; then
-    echo "ERROR: .claude/skills/ not found in $SCRIPT_DIR"
+if [[ ! -d "$SCRIPT_DIR/skills" ]]; then
+    echo "ERROR: skills/ not found in $SCRIPT_DIR"
     exit 1
 fi
 
@@ -92,8 +92,14 @@ cp "$SCRIPT_DIR/CLAUDE.md" "$TARGET_CLAUDE_MD"
 echo "Installing skills -> $SKILLS_DIR/"
 mkdir -p "$SKILLS_DIR"
 
-# Remove only skills that this repo ships, preserving user-created skills
-for skill_dir in "$SCRIPT_DIR/.claude/skills/"*/; do
+# Remove old flat .md files (legacy structure)
+if ls "$SKILLS_DIR/"*.md &>/dev/null; then
+    echo "  removing legacy flat .md skill files"
+    rm -f "$SKILLS_DIR/"*.md
+fi
+
+# Remove only skill directories that this repo ships, preserving user-created skills
+for skill_dir in "$SCRIPT_DIR/skills/"*/; do
     if [[ ! -d "$skill_dir" ]]; then continue; fi
     skill_name=$(basename "$skill_dir")
     target="$SKILLS_DIR/$skill_name"
@@ -102,8 +108,12 @@ for skill_dir in "$SCRIPT_DIR/.claude/skills/"*/; do
     fi
 done
 
-# Copy all skill directories
-cp -r "$SCRIPT_DIR/.claude/skills/"*/ "$SKILLS_DIR/"
+# Copy all skill directories (one at a time for compatibility)
+for skill_dir in "$SCRIPT_DIR/skills/"*/; do
+    if [[ ! -d "$skill_dir" ]]; then continue; fi
+    cp -r "$skill_dir" "$SKILLS_DIR/"
+done
+
 SKILL_COUNT=$(find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
 echo "  installed $SKILL_COUNT skills"
 
