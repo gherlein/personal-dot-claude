@@ -11,13 +11,13 @@ set -euo pipefail
 #   1. Backs up any existing CLAUDE.md and skills/ in ~/.claude
 #   2. Copies CLAUDE.md to ~/.claude/CLAUDE.md
 #   3. Replaces only repo-shipped skills in ~/.claude/skills/
-#   4. Preserves any user-created skill files not shipped by this repo
+#   4. Preserves any user-created skill directories not shipped by this repo
 #
 # Project install:
 #   1. Backs up any existing CLAUDE.md and .claude/skills/ in the project
 #   2. Copies CLAUDE.md to <project>/CLAUDE.md
 #   3. Replaces only repo-shipped skills in <project>/.claude/skills/
-#   4. Preserves any user-created skill files not shipped by this repo
+#   4. Preserves any user-created skill directories not shipped by this repo
 #
 # What it does NOT touch (Claude Code operational data):
 #   .credentials.json, history.jsonl, settings.json, stats-cache.json,
@@ -64,7 +64,7 @@ NEEDS_BACKUP=false
 if [[ -f "$TARGET_CLAUDE_MD" ]]; then
     NEEDS_BACKUP=true
 fi
-if [[ -d "$SKILLS_DIR" ]] && ls "$SKILLS_DIR/"*.md &>/dev/null; then
+if [[ -d "$SKILLS_DIR" ]] && find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d &>/dev/null | grep -q .; then
     NEEDS_BACKUP=true
 fi
 
@@ -76,9 +76,9 @@ if [[ "$NEEDS_BACKUP" == "true" ]]; then
         cp "$TARGET_CLAUDE_MD" "$BACKUP_DIR/CLAUDE.md"
         echo "  backed up CLAUDE.md"
     fi
-    if [[ -d "$SKILLS_DIR" ]] && ls "$SKILLS_DIR/"*.md &>/dev/null; then
+    if [[ -d "$SKILLS_DIR" ]] && find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d &>/dev/null | grep -q .; then
         mkdir -p "$BACKUP_DIR/skills"
-        cp "$SKILLS_DIR/"*.md "$BACKUP_DIR/skills/"
+        cp -r "$SKILLS_DIR/"*/ "$BACKUP_DIR/skills/"
         echo "  backed up skills/"
     fi
 fi
@@ -93,16 +93,19 @@ echo "Installing skills -> $SKILLS_DIR/"
 mkdir -p "$SKILLS_DIR"
 
 # Remove only skills that this repo ships, preserving user-created skills
-for skill in "$SCRIPT_DIR/.claude/skills/"*.md; do
-    target="$SKILLS_DIR/$(basename "$skill")"
-    if [[ -f "$target" ]]; then
-        rm "$target"
+for skill_dir in "$SCRIPT_DIR/.claude/skills/"*/; do
+    if [[ ! -d "$skill_dir" ]]; then continue; fi
+    skill_name=$(basename "$skill_dir")
+    target="$SKILLS_DIR/$skill_name"
+    if [[ -d "$target" ]]; then
+        rm -rf "$target"
     fi
 done
 
-cp "$SCRIPT_DIR/.claude/skills/"*.md "$SKILLS_DIR/"
-SKILL_COUNT=$(ls -1 "$SKILLS_DIR/"*.md | wc -l | tr -d ' ')
-echo "  installed $SKILL_COUNT skill files"
+# Copy all skill directories
+cp -r "$SCRIPT_DIR/.claude/skills/"*/ "$SKILLS_DIR/"
+SKILL_COUNT=$(find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
+echo "  installed $SKILL_COUNT skills"
 
 # Summary
 echo ""
@@ -110,7 +113,7 @@ echo "Installation complete."
 echo ""
 echo "Installed:"
 echo "  $TARGET_CLAUDE_MD"
-echo "  $SKILLS_DIR/ ($SKILL_COUNT files)"
+echo "  $SKILLS_DIR/ ($SKILL_COUNT skills)"
 echo ""
 if [[ "$NEEDS_BACKUP" == "true" ]]; then
     echo "Previous config backed up to: $BACKUP_DIR/"

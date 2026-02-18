@@ -1,5 +1,31 @@
 # CLAUDE.md - Greg Herlein's Development Environment
 
+## IMPORTANT: Repository Purpose
+
+**THIS REPOSITORY IS A SOURCE TEMPLATE** -- it contains the configuration structure meant to be installed to `~/.claude` using the `./safe-install` script.
+
+### For AI Agents
+
+If you are an AI agent reading this file:
+
+- **DO NOT make changes to files in this repository** (the `/personal-dot-claude` working directory)
+- This is a source template, not the active configuration
+- The active configuration lives in `~/.claude/` after installation
+- If asked to modify CLAUDE.md, skills, or other configuration files, make changes in `~/.claude/`, NOT in this repository
+- This repository should only be modified by the human user to update the template itself
+
+### For Human Users
+
+To install this configuration:
+
+```bash
+./safe-install
+```
+
+This will safely copy the contents to your `~/.claude` directory, backing up any existing configuration.
+
+After installation, Claude Code will read the configuration from `~/.claude/CLAUDE.md` and `~/.claude/skills/`.
+
 ## About Me
 
 Full-stack systems engineer working across the entire compute spectrum: embedded controllers (RP2040), SBCs (Raspberry Pi, Orange Pi), mobile phones and tablets, on-prem servers, cloud servers, and complex distributed systems on Kubernetes. Primary languages: **Go** and **web frontends** (TypeScript/JavaScript). I use Claude Code as my primary coding tool.
