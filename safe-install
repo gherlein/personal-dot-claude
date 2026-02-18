@@ -99,7 +99,7 @@ if ls "$SKILLS_DIR/"*.md &>/dev/null; then
 fi
 
 # Remove only skill directories that this repo ships, preserving user-created skills
-for skill_dir in "$SCRIPT_DIR/skills/"*/; do
+for skill_dir in "$SCRIPT_DIR/skills/"*; do
     if [[ ! -d "$skill_dir" ]]; then continue; fi
     skill_name=$(basename "$skill_dir")
     target="$SKILLS_DIR/$skill_name"
@@ -109,13 +109,19 @@ for skill_dir in "$SCRIPT_DIR/skills/"*/; do
 done
 
 # Copy all skill directories (one at a time for compatibility)
-for skill_dir in "$SCRIPT_DIR/skills/"*/; do
-    if [[ ! -d "$skill_dir" ]]; then continue; fi
-    cp -r "$skill_dir" "$SKILLS_DIR/"
+COPIED=0
+for skill_dir in "$SCRIPT_DIR/skills/"*; do
+    if [[ ! -d "$skill_dir" ]]; then
+        continue
+    fi
+    skill_name=$(basename "$skill_dir")
+    echo "  copying $skill_name"
+    cp -r "$skill_dir" "$SKILLS_DIR/" || echo "  ERROR: failed to copy $skill_name"
+    COPIED=$((COPIED + 1))
 done
 
-SKILL_COUNT=$(find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
-echo "  installed $SKILL_COUNT skills"
+SKILL_COUNT=$(find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+echo "  installed $SKILL_COUNT skills (attempted $COPIED)"
 
 # Summary
 echo ""
