@@ -190,6 +190,10 @@ Each review subagent writes its findings to `.llm/reviews/`:
 
 The cycle is: **implement phase -> test -> iterate -> next phase -> ... -> full test -> parallel reviews -> fix findings -> final test**. Never skip phases, never skip reviews, never leave failing tests.
 
-## Skills
+## Skills & Context Files
 
-Context-specific skills are in `.claude/skills/`. These provide detailed guidance for specific tasks and are designed to keep this file minimal.
+Before starting any task, read `~/.claude/INDEX.md` to identify which skills to invoke and which security rule files to read. Load only what is relevant to the current task -- do not read all files.
+
+- Skills (task-specific workflow guides): `~/.claude/skills/`
+- Security rules (always-on coding policies): `~/.claude/security-rules/`
+- Index (maps task types to the right files): `~/.claude/INDEX.md`

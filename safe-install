@@ -8,16 +8,19 @@ set -euo pipefail
 #   ./safe-install /path/to/project  Install to a project directory
 #
 # Global install:
-#   1. Backs up any existing CLAUDE.md and skills/ in ~/.claude
+#   1. Backs up any existing CLAUDE.md, skills/, INDEX.md, security-rules/ in ~/.claude
 #   2. Copies CLAUDE.md to ~/.claude/CLAUDE.md
 #   3. Replaces only repo-shipped skills in ~/.claude/skills/
 #   4. Preserves any user-created skill directories not shipped by this repo
+#   5. Copies INDEX.md to ~/.claude/INDEX.md
+#   6. Replaces ~/.claude/security-rules/ with repo-shipped rules
 #
 # Project install:
 #   1. Backs up any existing CLAUDE.md and .claude/skills/ in the project
 #   2. Copies CLAUDE.md to <project>/CLAUDE.md
 #   3. Replaces only repo-shipped skills in <project>/.claude/skills/
 #   4. Preserves any user-created skill directories not shipped by this repo
+#   Note: INDEX.md and security-rules/ are always installed globally to ~/.claude/
 #
 # What it does NOT touch (Claude Code operational data):
 #   .credentials.json, history.jsonl, settings.json, stats-cache.json,
@@ -56,8 +59,23 @@ if [[ ! -d "$SCRIPT_DIR/skills" ]]; then
     exit 1
 fi
 
+if [[ ! -f "$SCRIPT_DIR/INDEX.md" ]]; then
+    echo "ERROR: INDEX.md not found in $SCRIPT_DIR"
+    exit 1
+fi
+
+if [[ ! -d "$SCRIPT_DIR/security-rules" ]]; then
+    echo "ERROR: security-rules/ not found in $SCRIPT_DIR"
+    exit 1
+fi
+
 # Ensure target directory exists
 mkdir -p "$TARGET_DIR"
+
+# Global-only paths (INDEX.md and security-rules are always global, not project-level)
+GLOBAL_DIR="$HOME/.claude"
+GLOBAL_INDEX="$GLOBAL_DIR/INDEX.md"
+GLOBAL_SECURITY_RULES="$GLOBAL_DIR/security-rules"
 
 # Determine what needs backing up
 NEEDS_BACKUP=false
@@ -66,6 +84,14 @@ if [[ -f "$TARGET_CLAUDE_MD" ]]; then
 fi
 if [[ -d "$SKILLS_DIR" ]] && find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d &>/dev/null | grep -q .; then
     NEEDS_BACKUP=true
+fi
+if [[ "$TARGET_DIR" == "$GLOBAL_DIR" ]]; then
+    if [[ -f "$GLOBAL_INDEX" ]]; then
+        NEEDS_BACKUP=true
+    fi
+    if [[ -d "$GLOBAL_SECURITY_RULES" ]]; then
+        NEEDS_BACKUP=true
+    fi
 fi
 
 # Back up existing user config files (not operational data)
@@ -80,6 +106,16 @@ if [[ "$NEEDS_BACKUP" == "true" ]]; then
         mkdir -p "$BACKUP_DIR/skills"
         cp -r "$SKILLS_DIR/"*/ "$BACKUP_DIR/skills/"
         echo "  backed up skills/"
+    fi
+    if [[ "$TARGET_DIR" == "$GLOBAL_DIR" ]]; then
+        if [[ -f "$GLOBAL_INDEX" ]]; then
+            cp "$GLOBAL_INDEX" "$BACKUP_DIR/INDEX.md"
+            echo "  backed up INDEX.md"
+        fi
+        if [[ -d "$GLOBAL_SECURITY_RULES" ]]; then
+            cp -r "$GLOBAL_SECURITY_RULES" "$BACKUP_DIR/security-rules"
+            echo "  backed up security-rules/"
+        fi
     fi
 fi
 
@@ -123,6 +159,18 @@ done
 SKILL_COUNT=$(find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
 echo "  installed $SKILL_COUNT skills (attempted $COPIED)"
 
+# Install INDEX.md (always global, even for project installs)
+echo "Installing INDEX.md -> $GLOBAL_INDEX"
+mkdir -p "$GLOBAL_DIR"
+cp "$SCRIPT_DIR/INDEX.md" "$GLOBAL_INDEX"
+
+# Install security-rules (always global, even for project installs)
+echo "Installing security-rules -> $GLOBAL_SECURITY_RULES/"
+rm -rf "$GLOBAL_SECURITY_RULES"
+cp -r "$SCRIPT_DIR/security-rules" "$GLOBAL_SECURITY_RULES"
+RULE_COUNT=$(find "$GLOBAL_SECURITY_RULES" -name "*.md" | wc -l | tr -d ' ')
+echo "  installed $RULE_COUNT security rule files"
+
 # Summary
 echo ""
 echo "Installation complete."
@@ -130,6 +178,8 @@ echo ""
 echo "Installed:"
 echo "  $TARGET_CLAUDE_MD"
 echo "  $SKILLS_DIR/ ($SKILL_COUNT skills)"
+echo "  $GLOBAL_INDEX"
+echo "  $GLOBAL_SECURITY_RULES/ ($RULE_COUNT rule files)"
 echo ""
 if [[ "$NEEDS_BACKUP" == "true" ]]; then
     echo "Previous config backed up to: $BACKUP_DIR/"
