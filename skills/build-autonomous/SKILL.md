@@ -17,6 +17,15 @@ Use when the user wants a complete hands-off implementation from design through 
 
 ## Complete Workflow
 
+### Phase 0: Context Loading
+
+Before assembling any agents:
+
+1. Read `~/.claude/INDEX.md`
+2. Identify the project's languages, frameworks, and domains from the requirements and any existing code
+3. Read every relevant security rule file listed in INDEX.md for those languages and domains -- at minimum always read `~/.claude/security-rules/_core/owasp-2025.md`
+4. Note which skills from INDEX.md apply to this project (e.g., `postgresql`, `rest-api-design`, `web-frontend`) -- invoke them as needed during design and implementation phases
+
 ### Phase 1: Sub-Agent Team Assembly
 
 Create specialized sub-agents for parallel work:
@@ -112,7 +121,8 @@ Launch THREE review sub-agents in parallel:
    - Write to `.llm/reviews/design-review.md`
 
 3. **Security Review**
-   - Full audit against OWASP top 10
+   - Read the security rule files loaded in Phase 0 as the authoritative checklist
+   - Full audit against those rules (OWASP top 10, language-specific, framework-specific)
    - Input validation boundaries
    - Credential handling
    - Injection vectors
