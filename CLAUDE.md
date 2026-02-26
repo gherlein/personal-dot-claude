@@ -14,6 +14,13 @@ If you are an AI agent reading this file:
 - If asked to modify CLAUDE.md, skills, or other configuration files, make changes in `~/.claude/`, NOT in this repository
 - This repository should only be modified by the human user to update the template itself
 
+Also follow these instructions:
+
+- there is no time pressure - Autonomous builds have unlimited time
+- never assume you should simplify - follow the specifications/requirements or ask
+- never deferred complexity - if you are unsure about complext builds, stop and ask
+- carefully read requirements - don't assumer functional proof-of-concept over spec compliance
+
 ### For Human Users
 
 To install this configuration:
