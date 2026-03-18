@@ -14,6 +14,18 @@ Use for complex multi-step projects spanning multiple services or tiers.
 - "Refactor the authentication system across all services"
 - "Implement a new API with frontend, backend, and k8s deployment"
 
+## Execution Mode
+
+**With subagents (Claude Code, Codex):**
+- Delegate tasks to sub-agents using the Research and Implementation patterns below
+- One agent per file/domain; synthesize results between steps
+
+**Without subagents (Pi, single-session):**
+- Execute each decomposed task yourself in sequence
+- Write a task log to `.llm/orchestration-log.md` — record what each step produced before starting the next
+- Apply the same proportionality check and dynamic re-evaluation after every step
+- Synthesize in the same session rather than collecting sub-agent reports
+
 ## Process
 
 ### 1. Decompose

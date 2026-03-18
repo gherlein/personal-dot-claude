@@ -15,22 +15,41 @@ Load only what applies to the current task -- do not read all files.
 
 | When | Skill |
 |------|-------|
-| Non-trivial feature spanning multiple packages, services, or tiers | `plan` |
+| Non-trivial feature spanning multiple packages, services, or tiers | `plan` (use `writing-plans` for rigorous plans with subagent review) |
 | Multi-step task needing a checklist with user confirmation at each step | `plan-todo` |
 | Full autonomous design-build-test-review cycle | `build-autonomous` |
-| Complex project requiring sub-agent delegation | `orchestrate` |
+| Complex project requiring sub-agent delegation | `orchestrate` (use `subagent-driven-development` for rigorous two-stage review) |
 | Spec or requirements docs exist and must be authoritative | `spec-driven` |
 | Complex architecture or design decision needing multiple perspectives | `three-experts` |
+
+### Process & Workflow (Superpowers)
+
+| When | Skill |
+|------|-------|
+| Any implementation task (design approval required first) | `brainstorming` |
+| 2+ independent tasks that can run concurrently | `dispatching-parallel-agents` |
+| Executing a pre-written plan in a fresh session | `executing-plans` |
+| Completing and merging a development branch | `finishing-a-development-branch` |
+| Processing incoming code review feedback | `receiving-code-review` |
+| Requesting a code review | `requesting-code-review` |
+| Complex multi-task plan requiring delegated implementation | `subagent-driven-development` |
+| Debugging any issue (preferred, with Iron Law) | `systematic-debugging` |
+| Writing new code (test-first mandatory) | `test-driven-development` |
+| Isolating work in a git worktree | `using-git-worktrees` |
+| Selecting which skill to use | `using-superpowers` |
+| Before claiming any work is complete | `verification-before-completion` |
+| Writing a multi-step implementation plan | `writing-plans` |
+| Creating a new skill | `writing-skills` |
 
 ### Code Quality
 
 | When | Skill |
 |------|-------|
-| Reviewing code before merging | `code-review` |
+| Reviewing code before merging | `code-review` (use `requesting-code-review` / `receiving-code-review` for workflow) |
 | Restructuring existing code | `refactoring` |
 | Removing bad or redundant comments | `clean-comments` |
 | Finding missing edge cases after implementation | `edge-case-discovery` |
-| Writing or reviewing tests | `test-as-guardrails` |
+| Writing or reviewing tests | `test-as-guardrails` (use `test-driven-development` to enforce test-first order) |
 | Iterative improvement of algorithms or system design | `refine` |
 
 ### Language & Domain
@@ -42,7 +61,7 @@ Load only what applies to the current task -- do not read all files.
 | React / TypeScript / Tailwind frontend work | `web-frontend` |
 | PostgreSQL schema, queries, or migrations | `postgresql` |
 | Designing or reviewing a REST API | `rest-api-design` |
-| Debugging any issue (start here) | `evidence-based-debugging` |
+| Debugging any issue (start here) | `evidence-based-debugging` (use `systematic-debugging` first; this adds Go/K8s domain tools) |
 | Writing READMEs, API docs, or design documents | `documentation` |
 | Cherry-pick, rebase, or complex git operations | `git-ops` |
 

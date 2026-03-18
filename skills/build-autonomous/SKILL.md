@@ -17,16 +17,31 @@ Use when the user wants a complete hands-off implementation from design through 
 
 ## Complete Workflow
 
-### Phase 0: Context Loading
+### Phase 0: Brainstorming
 
-Before assembling any agents:
+**Invoke the `brainstorming` skill** before doing anything else.
+
+The brainstorming skill will:
+1. Explore project context
+2. Ask clarifying questions (one at a time) to understand purpose, constraints, and success criteria
+3. Propose 2-3 approaches with trade-offs
+4. Present a design and get user approval section by section
+5. Write the approved design to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
+6. Run a spec-document-reviewer subagent to validate the spec
+7. Ask the user to review the written spec
+
+**Do not proceed to Phase 1 until the user has approved the spec.** This is the only phase that requires user interaction. Everything after is autonomous.
+
+### Phase 1: Context Loading
+
+After spec approval, load the full execution context:
 
 1. Read `~/.claude/INDEX.md`
-2. Identify the project's languages, frameworks, and domains from the requirements and any existing code
+2. Identify the project's languages, frameworks, and domains from the approved spec and any existing code
 3. Read every relevant security rule file listed in INDEX.md for those languages and domains -- at minimum always read `~/.claude/security-rules/_core/owasp-2025.md`
 4. Note which skills from INDEX.md apply to this project (e.g., `postgresql`, `rest-api-design`, `web-frontend`) -- invoke them as needed during design and implementation phases
 
-### Phase 1: Sub-Agent Team Assembly
+### Phase 2: Sub-Agent Team Assembly
 
 Create specialized sub-agents for parallel work:
 
@@ -35,19 +50,20 @@ Create specialized sub-agents for parallel work:
 3. **Implementation Agent(s)** - Code implementation per module/service
 4. **Review Agents** - Spec compliance, design, security reviews (post-implementation)
 
-### Phase 2: Design and Planning
+### Phase 3: Design and Planning
 
-Run design and test planning agents in parallel:
+**With subagents:** run design and test planning agents in parallel.
+**Without subagents:** run design first, then test planning, in the same session.
 
-**Design Agent Tasks:**
-- Analyze requirements and constraints
+**Design Agent Tasks (or: design pass in current session):**
+- Analyze the approved spec from Phase 0 and all constraints
 - Create architecture (modules, boundaries, contracts, state model)
 - Define interfaces (APIs, protocols, schemas)
 - Document constraints and invariants
 - Write to `docs/DESIGN.md`
 - Update `PROJECT.md` if it exists with project-specific details
 
-**Test Planning Agent Tasks:**
+**Test Planning Agent Tasks (or: test planning pass in current session):**
 - Design test strategy (unit, integration, e2e)
 - Define test phases aligned with implementation phases
 - Specify test coverage targets
@@ -58,7 +74,7 @@ Run design and test planning agents in parallel:
 - If domain-specific settings provided (e.g., "service health every 5 minutes", "7-day forecast"), update `CLAUDE.md` project instructions with these as requirements
 - Document any service-level parameters, refresh intervals, or constraints
 
-### Phase 3: Project Infrastructure Setup
+### Phase 4: Project Infrastructure Setup
 
 Before implementation begins, ensure proper version control and file management:
 
@@ -84,7 +100,9 @@ Before implementation begins, ensure proper version control and file management:
      - **Rust**: `target/`
 4. Do NOT overwrite existing entries, only append missing ones
 
-### Phase 4: Phased Implementation
+### Phase 5: Phased Implementation
+
+Each Implementation Agent **must invoke the `test-driven-development` skill** at the start of its work. Tests are written before implementation code — no exceptions.
 
 Follow the Autonomous Implementation Protocol from CLAUDE.md:
 
@@ -92,25 +110,29 @@ Follow the Autonomous Implementation Protocol from CLAUDE.md:
 2. Implement ONE phase at a time
 3. After each phase:
    - Run ALL tests for that phase (`make test` or equivalent)
-   - If any test fails: fix code, re-run tests, repeat until ALL pass
+   - If any test fails: **invoke `systematic-debugging`** to diagnose the root cause before attempting a fix — never guess or retry blindly
+   - After fixing, re-run tests; repeat until ALL pass
    - Do NOT proceed to next phase with failing tests
 4. Repeat until all phases complete
 
-### Phase 5: Full Integration Validation
+### Phase 6: Full Integration Validation
 
 After all phases implemented:
 
 1. Run entire test suite end-to-end
 2. Run build (`make build`)
 3. Run linters if configured
-4. Iterate on any failures until everything passes
+4. If anything fails: **invoke `systematic-debugging`** to diagnose before fixing, then iterate until everything passes
 
-### Phase 6: Parallel Review Gate
+### Phase 7: Review Gate
 
-Launch THREE review sub-agents in parallel:
+**With subagents:** invoke `dispatching-parallel-agents` to launch all three reviewers simultaneously.
+**Without subagents:** run all three reviews sequentially in the current session, writing each output file before starting the next.
+
+Three reviews — run in parallel or sequentially depending on capability:
 
 1. **Spec Compliance Review**
-   - Compare implementation vs `PROJECT.md` and `docs/DESIGN.md`
+   - Compare implementation vs the approved spec from Phase 0 and `docs/DESIGN.md`
    - Flag deviations, missing requirements, undocumented behavior
    - Write to `.llm/reviews/spec-review.md`
 
@@ -121,7 +143,7 @@ Launch THREE review sub-agents in parallel:
    - Write to `.llm/reviews/design-review.md`
 
 3. **Security Review**
-   - Read the security rule files loaded in Phase 0 as the authoritative checklist
+   - Read the security rule files loaded in Phase 1 as the authoritative checklist
    - Full audit against those rules (OWASP top 10, language-specific, framework-specific)
    - Input validation boundaries
    - Credential handling
@@ -129,7 +151,7 @@ Launch THREE review sub-agents in parallel:
    - Dependency risks
    - Write to `.llm/reviews/security-review.md`
 
-### Phase 7: Review Remediation
+### Phase 8: Review Remediation
 
 1. Read all three review files
 2. Triage findings: critical > high > medium > low
@@ -137,7 +159,11 @@ Launch THREE review sub-agents in parallel:
 4. Document deferred medium/low findings with rationale in `.llm/reviews/deferred.md`
 5. Re-run full test suite to confirm no regressions
 
-### Phase 8: Documentation
+### Phase 9: Verification Before Completion
+
+**Invoke `verification-before-completion`** before writing documentation or declaring the work done. This skill enforces a final gate — do not skip it.
+
+### Phase 10: Documentation
 
 Write `README.md` with:
 - Project summary and purpose
@@ -149,12 +175,17 @@ Write `README.md` with:
 - Usage examples
 - Development workflow
 
+### Phase 11: Finishing the Development Branch
+
+**Invoke `finishing-a-development-branch`** as the terminal step. This skill handles final branch cleanup, commit hygiene, and any remaining integration steps before the work is considered delivered.
+
 ## Key Constraints
 
 - **Never skip phases** - each phase must complete and pass tests before next
 - **Never skip reviews** - all three reviews must complete before declaring done
-- **Never leave failing tests** - iterate until all tests pass
-- **Minimal user interaction** - design for autonomous execution from start to finish
+- **Never leave failing tests** - use `systematic-debugging` to diagnose, then iterate until all tests pass
+- **Test-first always** - `test-driven-development` is mandatory for every Implementation Agent
+- **Minimal user interaction** - Phase 0 is the only interactive phase; everything after is autonomous
 - **Document as you go** - design docs, test plans, and README are deliverables, not afterthoughts
 
 ## Invocation Pattern
@@ -168,15 +199,17 @@ Or:
 Or:
 > "/build-autonomous [requirements]"
 
-Then follow all phases sequentially with no human interaction until final delivery.
+Then follow all phases sequentially with no human interaction after Phase 0 approval.
 
 ## Success Criteria
 
+- Brainstorming complete and spec approved by user
 - All design documents written and committed
 - All test plans documented
-- All code implemented and passing tests
+- All code implemented with tests written first
 - All builds successful
 - All three reviews completed
 - All critical/high findings remediated
+- Verification-before-completion gate passed
 - README.md complete and accurate
-- Project ready for deployment or handoff
+- Development branch finished and clean
