@@ -8,11 +8,8 @@
 
 If you are an AI agent reading this file:
 
-- **DO NOT make changes to files in this repository** (the `/personal-dot-claude` working directory)
 - This is a source template, not the active configuration
 - The active configuration lives in `~/.claude/` after installation
-- If asked to modify CLAUDE.md, skills, or other configuration files, make changes in `~/.claude/`, NOT in this repository
-- This repository should only be modified by the human user to update the template itself
 
 Also follow these instructions:
 
@@ -101,6 +98,7 @@ Requirements, specifications, and design documents are the most valuable project
 ## Project File Conventions
 
 - Look for `PROJECT.md` in the working folder for project details
+- Look for `REQUIREMENTS.md` in the working folder for detailed requirements - this is what you work from, always
 - Look for `docs/DESIGN.md` as the master design document
 - If asked to design software, write the design to `docs/DESIGN.md`
 
@@ -120,17 +118,15 @@ On any file write to a development project folder -- and absolutely if a `.git` 
 ## Project Building
 
 - Always provide a Makefile instead of build scripts
+- Never use go directly to do builds - always write a makefile and use that
 - Makefiles should print targets if no target is provided on the command line
 - Makefiles should always provide build, test, clean, run-tests targets as a minimum
 
 ## Git Commits
 
-- Stage files individually (`git add <file1> <file2>`) -- never `git add .` or `git add -A`
-- Run `just precommit` if a justfile with that recipe exists
 - Commit messages: present-tense verb, 60-120 chars, single line, end with period, no praise adjectives, no Claude attribution
 - If the prompt was a compiler/linter error, use a `fixup!` prefix
 - Echo the commit command and confirm with the user before running
-- If pre-commit hooks fail, stage resulting changes and retry -- never `--no-verify`
 
 ## Build Commands
 

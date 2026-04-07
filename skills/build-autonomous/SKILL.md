@@ -17,24 +17,9 @@ Use when the user wants a complete hands-off implementation from design through 
 
 ## Complete Workflow
 
-### Phase 0: Brainstorming
-
-**Invoke the `brainstorming` skill** before doing anything else.
-
-The brainstorming skill will:
-1. Explore project context
-2. Ask clarifying questions (one at a time) to understand purpose, constraints, and success criteria
-3. Propose 2-3 approaches with trade-offs
-4. Present a design and get user approval section by section
-5. Write the approved design to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
-6. Run a spec-document-reviewer subagent to validate the spec
-7. Ask the user to review the written spec
-
-**Do not proceed to Phase 1 until the user has approved the spec.** This is the only phase that requires user interaction. Everything after is autonomous.
-
 ### Phase 1: Context Loading
 
-After spec approval, load the full execution context:
+Load the full execution context:
 
 1. Read `~/.claude/INDEX.md`
 2. Identify the project's languages, frameworks, and domains from the approved spec and any existing code
@@ -132,7 +117,7 @@ After all phases implemented:
 Three reviews — run in parallel or sequentially depending on capability:
 
 1. **Spec Compliance Review**
-   - Compare implementation vs the approved spec from Phase 0 and `docs/DESIGN.md`
+   - Compare implementation vs requirements and `docs/DESIGN.md`
    - Flag deviations, missing requirements, undocumented behavior
    - Write to `.llm/reviews/spec-review.md`
 
@@ -185,7 +170,7 @@ Write `README.md` with:
 - **Never skip reviews** - all three reviews must complete before declaring done
 - **Never leave failing tests** - use `systematic-debugging` to diagnose, then iterate until all tests pass
 - **Test-first always** - `test-driven-development` is mandatory for every Implementation Agent
-- **Minimal user interaction** - Phase 0 is the only interactive phase; everything after is autonomous
+- **Minimal user interaction** - autonomous execution throughout
 - **Document as you go** - design docs, test plans, and README are deliverables, not afterthoughts
 
 ## Invocation Pattern
@@ -203,7 +188,6 @@ Then follow all phases sequentially with no human interaction after Phase 0 appr
 
 ## Success Criteria
 
-- Brainstorming complete and spec approved by user
 - All design documents written and committed
 - All test plans documented
 - All code implemented with tests written first
