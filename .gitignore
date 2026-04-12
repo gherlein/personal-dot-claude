@@ -14,3 +14,10 @@ session-env/
 sessions/
 shell-snapshots/
 tasks/
+
+# Sensitive/runtime files
+.credentials.json
+history.jsonl
+mcp-needs-auth-cache.json
+policy-limits.json
+settings.json
