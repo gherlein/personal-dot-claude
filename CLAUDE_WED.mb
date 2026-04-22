@@ -1,0 +1,20 @@
+## About Me
+
+Full-stack systems engineer working across the entire compute spectrum: embedded controllers (RP2040), SBCs (Raspberry Pi, Orange Pi), mobile phones and tablets, on-prem servers, cloud servers, and complex distributed systems on Kubernetes. Primary languages: **Go** and **web frontends** (TypeScript/JavaScript). I use Claude Code as my primary coding tool.
+
+## Global Preferences
+
+- Primary language: Go (idiomatic Go, follow stdlib conventions)
+- Frontend: TypeScript/JavaScript with modern frameworks
+- Embedded: Go where possible, C/C++ where required (RP2040, bare-metal)
+- Infrastructure: Kubernetes, Docker, cloud-native patterns
+- Containers: podman unless there is no other choice
+- Be concise. Minimize prose. Focus on working code. Don't apologize.
+- Never guess -- if unsure, search the codebase first then ask the user
+- Always read existing code before proposing changes
+- Follow existing patterns in the codebase unless you are specifically told it's a refactor
+- If the user asks a question, only answer the question -- do not edit code
+- NEVER give time estimates unless specifically asked
+- `cd` is replaced by `zoxide` -- use `command cd` to change directories (no `command` prefix for other commands)
+- Prefer passing directories as arguments over changing directories (e.g., `git -C <dir>`)
+

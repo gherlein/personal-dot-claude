@@ -17,6 +17,7 @@ Also follow these instructions:
 - never assume you should simplify - follow the specifications/requirements or ask
 - never defer complexity - if you are unsure about complex builds, stop and ask
 - carefully read requirements - don't assume functional proof-of-concept over spec compliance
+- project level requirements will usually be in a ./REQUIREMENTS.md file
 
 ### For Human Users
 
@@ -38,17 +39,132 @@ Full-stack systems engineer working across the entire compute spectrum: embedded
 
 - Primary language: Go (idiomatic Go, follow stdlib conventions)
 - Frontend: TypeScript/JavaScript with modern frameworks
-- Embedded: Go where possible, C/C++ where required (RP2040, bare-metal)
-- Infrastructure: Kubernetes, Docker, cloud-native patterns
+- Embedded: Go/Tinygo where possible, C/C++ where required (RP2040, bare-metal) and only when uou have clearly informed me
+- Infrastructure: Kubernetes, Docker, cloud-native patterns, OR, simplest possible EC2/VM - if unsure, ask
 - Containers: podman unless there is no other choice
-- Be concise. Minimize prose. Focus on working code. Don't apologize.
-- Never guess -- if unsure, search the codebase first then ask the user
+- Be concise. Minimize prose. Focus on working code. Don't apologize
+- Never guess -- if unsure, search the codebase first then ask the user - unless you have no code, in which case ask!
 - Always read existing code before proposing changes
 - Follow existing patterns in the codebase unless you are specifically told it's a refactor
+- Consider the underlying architecture/design patterns and follow them unless told otherwise
+- Don't change the architecture/design patterns of a project without permission
 - If the user asks a question, only answer the question -- do not edit code
 - NEVER give time estimates unless specifically asked
-- `cd` is replaced by `zoxide` -- use `command cd` to change directories (no `command` prefix for other commands)
 - Prefer passing directories as arguments over changing directories (e.g., `git -C <dir>`)
+* I am an expert software engineer but sometimes rusty.  
+* I am a linux expert and strongly favor Linux of Ubuntu/Debian flavor.  I avoid Windows.
+* I want all documents in markdown format unless I specifically ask otherwise
+
+## Guiding Principles
+
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+Tradeoff: These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+
+1. Think Before Coding
+Don't assume. Don't hide confusion. Surface tradeoffs.
+
+Before implementing:
+
+State your assumptions explicitly. If uncertain, ask.
+If multiple interpretations exist, present them - don't pick silently.
+If a simpler approach exists, say so. Push back when warranted.
+If something is unclear, stop. Name what's confusing. Ask.
+
+2. Simplicity First
+Minimum code that solves the problem. Nothing speculative.
+
+No features beyond what was asked.
+No abstractions for single-use code.
+No "flexibility" or "configurability" that wasn't requested.
+No error handling for impossible scenarios.
+If you write 200 lines and it could be 50, rewrite it.
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+3. Surgical Changes
+Touch only what you must. Clean up only your own mess.
+
+When editing existing code:
+
+Don't "improve" adjacent code, comments, Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+
+Tradeoff: These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+
+1. Think Before Coding
+Don't assume. Don't hide confusion. Surface tradeoffs.
+
+Before implementing:
+
+State your assumptions explicitly. If uncertain, ask.
+If multiple interpretations exist, present them - don't pick silently.
+If a simpler approach exists, say so. Push back when warranted.
+If something is unclear, stop. Name what's confusing. Ask.
+2. Simplicity First
+Minimum code that solves the problem. Nothing speculative.
+
+No features beyond what was asked.
+No abstractions for single-use code.
+No "flexibility" or "configurability" that wasn't requested.
+No error handling for impossible scenarios.
+If you write 200 lines and it could be 50, rewrite it.
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+3. Surgical Changes
+Touch only what you must. Clean up only your own mess.
+
+When editing existing code:
+
+Don't "improve" adjacent code, comments, or formatting.
+Don't refactor things that aren't broken.
+Match existing style, even if you'd do it differently.
+If you notice unrelated dead code, mention it - don't delete it.
+When your changes create orphans:
+
+Remove imports/variables/functions that YOUR changes made unused.
+Don't remove pre-existing dead code unless asked.
+The test: Every changed line should trace directly to the user's request.
+
+4. Goal-Driven Execution
+Define success criteria. Loop until verified.
+
+Transform tasks into verifiable goals:
+
+"Add validation" → "Write tests for invalid inputs, then make them pass"
+"Fix the bug" → "Write a test that reproduces it, then make it pass"
+"Refactor X" → "Ensure tests pass before and after"
+For multi-step tasks, state a brief plan:
+
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+These guidelines are working if: fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.or formatting.
+
+Don't refactor things that aren't broken.
+Match existing style, even if you'd do it differently.
+If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+- The test: Every changed line should trace directly to the user's request.
+
+4. Goal-Driven Execution
+Define success criteria. Loop until verified.
+
+Transform tasks into verifiable goals:
+
+"Add validation" → "Write tests for invalid inputs, then make them pass"
+"Fix the bug" → "Write a test that reproduces it, then make it pass"
+"Refactor X" → "Ensure tests pass before and after"
+For multi-step tasks, state a brief plan:
+
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+These guidelines are working if: fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
 
 ## Code Quality Rules
 
@@ -97,10 +213,11 @@ Requirements, specifications, and design documents are the most valuable project
 
 ## Project File Conventions
 
-- Look for `PROJECT.md` in the working folder for project details
+- Look for `PROJECT.md` in the working folder for a high level description of the project - often the basis for deriving requirements
 - Look for `REQUIREMENTS.md` in the working folder for detailed requirements - this is what you work from, always
-- Look for `docs/DESIGN.md` as the master design document
+- Look for `docs/DESIGN.md` as the master design document - this is what you will write and keep up to date based on REQUIREMENTS.md
 - If asked to design software, write the design to `docs/DESIGN.md`
+- If changes are requested, first update the REQUIREMENTS.md and the the DESIGN.md and then the implementation in accordance with the design
 
 ## Gitignore Policy
 
@@ -111,6 +228,7 @@ On any file write to a development project folder -- and absolutely if a `.git` 
    - `.envrc`
    - `*~`
    - `bin/`
+   - '.llm/'
 2. **Add language/framework best-practice ignores** for the project type (e.g., Go: `bin/`, `vendor/`; Node: `node_modules/`, `dist/`; Python: `__pycache__/`, `*.pyc`, `.venv/`; C/C++: `*.o`, `*.a`, `*.so`, `build/`; Rust: `target/`; etc.)
 3. **Do not overwrite** existing entries -- only append missing ones
 4. **Check on every write** -- if `.gitignore` does not exist, create it; if it exists, verify the mandatory entries are present and add any that are missing
@@ -135,7 +253,7 @@ On any file write to a development project folder -- and absolutely if a `.git` 
 
 ## LLM Context
 
-- `.llm/` at repo root contains extra LLM context (excluded from git via `.git/info/exclude`)
+- `.llm/` at repo root contains extra LLM context (excluded from git via `.git/info/exclude`) and .gitignore
 - If `.llm/todo.md` exists, it is the active task list -- mark tasks as done and keep it updated
 - Everything else in `.llm/` is read-only context
 
@@ -167,6 +285,7 @@ After all phases are complete:
 2. Run the build (`make build`)
 3. Run linters if configured
 4. If anything fails, iterate: fix, re-run, repeat until everything passes
+5. Do not skip or ignore tests.  Anything that fails must be fixed or you STOP and get directions
 
 ### Parallel Review Gate
 
