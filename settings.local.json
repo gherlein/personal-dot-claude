@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(wait)"
+      "Bash(wait)",
+      "Bash(chmod +x /home/gherlein/dotfiles/scripts/bin/verify-gpu)",
+      "Bash(bash -n /home/gherlein/dotfiles/scripts/bin/verify-gpu)",
+      "Bash(command -v shellcheck)",
+      "Bash(shellcheck /home/gherlein/dotfiles/scripts/bin/verify-gpu)",
+      "Bash(/home/gherlein/dotfiles/scripts/bin/verify-gpu)"
     ]
   }
 }

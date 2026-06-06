@@ -19,13 +19,6 @@ Also follow these instructions:
 - carefully read requirements - don't assume functional proof-of-concept over spec compliance
 - project level requirements will usually be in a ./REQUIREMENTS.md file
 
-Also, when writing README.md files, always insert this where appropriate near the top:
-
-```
-Disclaimer: This works for me — that's the entire guarantee. Built with AI in the loop, so check your own biases before you love it or hate it on principle. Use at your own risk, fork freely, and don't @ me when it explodes. (But do drop me a note if it helps — pay it forward.)
-```
-
-
 ### For Human Users
 
 To install this configuration:
