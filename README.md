@@ -1,3 +1,4 @@
+# DEPRECATED AND ARCHIVED - HISTORICAL VALUE ONLY
 # dot-agents
 
 A portable AI coding agent configuration: coding standards, 38 workflow skill files, and a security rule library — installable into any supported agent in one command.
